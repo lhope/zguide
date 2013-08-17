@@ -1,10 +1,10 @@
 Examples in Lisp (:cl-czmq)
 
 - You need:
-  - [ZMQ](zeromq.org) (of course)
+  - [ZMQ](http://zeromq.org) (of course)
   - [CZMQ](http://czmq.zeromq.org/)
   - [cl-czmq](https://github.com/lhope/cl-czmq)
-  - [sbcl](http//sbcl.org) (other lisps are untested).
+  - [sbcl](http://sbcl.org) (other lisps are untested).
   - [quicklisp](http://quicklisp.org)
 - Ensure quicklisp is loaded in your .sbclrc.
 - Link or download cl-czmq into your `quicklisp/local-projects/` directory
