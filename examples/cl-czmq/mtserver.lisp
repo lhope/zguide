@@ -1,6 +1,6 @@
 ;;  Multithreaded Hello World server
 
-(ql:quickload '("cl-czmq" "bordeaux-threads"))
+(ql:quickload "cl-czmq")
 (use-package :cl-czmq)
 
 (defun worker-routine (context)
@@ -32,8 +32,7 @@
       ;;  Launch pool of worker threads
       (loop repeat 5
 	 do
-	   (bordeaux-threads:make-thread
-	    (lambda () (worker-routine context))))
+	   (zthread-new #'worker-routine context))
       ;;  Connect work threads to client threads via a queue proxy
       (zsocket-proxy clients workers)))
 

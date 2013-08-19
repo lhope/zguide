@@ -1,7 +1,7 @@
 ;;  Load-balancing broker
 ;;  Clients and workers are shown here in-process
 
-(ql:quickload '("cl-czmq" "bordeaux-threads"))
+(ql:quickload "cl-czmq")
 (use-package :cl-czmq)
 
 (defconstant +nbr-clients+ 10)
@@ -83,10 +83,10 @@
       (zsocket-bind backend "ipc://backend.ipc")
 
       (loop repeat +nbr-clients+ do
-	   (bordeaux-threads:make-thread #'client-task))
+	   (zthread-new #'client-task))
 
       (loop repeat +nbr-workers+ do
-	   (bordeaux-threads:make-thread #'worker-task))
+	   (zthread-new #'worker-task))
 
       ;;  .split main task body
       ;;  Here is the main loop for the least-recently-used queue. It has two

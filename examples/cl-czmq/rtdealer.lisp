@@ -1,6 +1,6 @@
 ;;  ROUTER-to-DEALER example
 
-(ql:quickload '("cl-czmq" "bordeaux-threads"))
+(ql:quickload "cl-czmq")
 (use-package :cl-czmq)
 
 (defconstant +nbr-workers+ 10)
@@ -47,7 +47,7 @@
       (setf *random-state* (make-random-state t))
 
       (loop repeat +nbr-workers+ do
-	   (bordeaux-threads:make-thread #'worker-task))
+	   (zthread-new #'worker-task))
 
       ;;  Run for five seconds and then tell workers to end
       (loop

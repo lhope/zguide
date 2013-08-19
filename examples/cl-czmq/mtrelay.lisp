@@ -1,6 +1,6 @@
 ;;  Multithreaded relay
 
-(ql:quickload '("cl-czmq" "bordeaux-threads"))
+(ql:quickload "cl-czmq")
 (use-package :cl-czmq)
 
 (defun step1 (context)
@@ -17,8 +17,7 @@
       ((receiver :zmq-pair))
     (zsocket-bind receiver "inproc://step2")
 
-    (bordeaux-threads:make-thread
-     (lambda () (step1 context)))
+    (zthread-new #'step1 context)
 
     ;;  Wait for signal and pass it on
     (zstr-recv receiver))
@@ -37,8 +36,7 @@
 	((receiver :zmq-pair))
       (zsocket-bind receiver "inproc://step3")
 
-      (bordeaux-threads:make-thread
-       (lambda () (step2 context)))
+      (zthread-new #'step2 context)
 
       ;;  Wait for signal
       (zstr-recv receiver))

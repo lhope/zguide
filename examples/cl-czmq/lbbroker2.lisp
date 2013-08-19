@@ -1,7 +1,7 @@
 ;;  Load-balancing broker
 ;;  Demonstrates use of the CZMQ API
 
-(ql:quickload '("cl-czmq" "bordeaux-threads"))
+(ql:quickload "cl-czmq")
 (use-package :cl-czmq)
 
 (defconstant +nbr-clients+ 10)
@@ -78,9 +78,9 @@
       (zsocket-bind backend "ipc://backend.ipc")
 
       (loop repeat +nbr-clients+ do
-	   (bordeaux-threads:make-thread #'client-task))
+	   (zthread-new #'client-task))
       (loop repeat +nbr-workers+ do
-	   (bordeaux-threads:make-thread #'worker-task))
+	   (zthread-new #'worker-task))
 
       ;;  Queue of available workers
       (let ((workers (make-queue)))
