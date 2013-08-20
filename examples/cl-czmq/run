@@ -3,4 +3,4 @@
 EXAMPLE="$1"
 shift
 
-sbcl --load "$EXAMPLE" --eval '(main)' --quit "$*"
+sbcl --load "$EXAMPLE" --eval '(main)' --quit "$@"
