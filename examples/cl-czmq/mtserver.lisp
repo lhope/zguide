@@ -3,6 +3,11 @@
 (ql:quickload "cl-czmq")
 (use-package :cl-czmq)
 
+;; This causes lowlevel issues when exiting, due to the zctx being
+;; passed between threads. Unlike zmq's context, zctx contains
+;; references to sockets to shutdown. This can be solved by using
+;; zctx-shadow, or zthread-fork, which internally uses zctx-shadow.
+
 (defun worker-routine (context)
   ;;  Socket to talk to dispatcher
   (with-zsockets context
