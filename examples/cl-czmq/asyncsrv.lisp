@@ -47,7 +47,7 @@
     (zsocket-connect worker "inproc://backend")
     (loop do
 	 ;;  The DEALER socket gives us the reply envelope and message
-	 (let ((msg (zmsg-recv worker)));; (retry (zmsg-recv worker))))
+	 (let ((msg (zmsg-recv worker)))
 	   (assert msg () "No msg! ~A" (cl-czmq::%zmq-err))
 	   (let ((identity (zmsg-pop msg))
 		 (content (zmsg-pop msg)))

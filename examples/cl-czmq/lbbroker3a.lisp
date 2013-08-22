@@ -29,13 +29,6 @@
 (defun queue-length (q)
   (length (car q)))
 
-;; protect against interrupts caused by e.g. garbage collection.
-(defmacro retry (&body body)
-  (let ((g!val (gensym)))
-    `(loop for ,g!val = (progn ,@body)
-	when ,g!val return ,g!val)))
-
-
 ;;  Basic request-reply client using REQ socket
 ;;
 (defun client-task (&rest args)
@@ -48,7 +41,7 @@
       ;;  Send request, get reply
       (loop do
 	   (zstr-send client "HELLO")
-	   (let ((reply (retry (zstr-recv client))))
+	   (let ((reply (zstr-recv-retry client)))
 	     (format t "Client: ~s~%" reply))
 	   (sleep 1)))))
 
@@ -67,7 +60,7 @@
 
 	;;  Process messages as they arrive
 	(loop do
-	   (let ((msg (retry (zmsg-recv worker))))
+	   (let ((msg (zmsg-recv-retry worker)))
 	     ;;  Get request, send reply
 
 	     (zframe-reset (zmsg-last msg) "OK")
