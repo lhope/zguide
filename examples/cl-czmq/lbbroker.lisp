@@ -7,10 +7,6 @@
 (defconstant +nbr-clients+ 10)
 (defconstant +nbr-workers+ 3)
 
-;;  Dequeue operation for queue implemented as list of anything
-(defun dequeue (q)
-  (pop q))
-
 ;;  Basic request-reply client using REQ socket
 ;;  Because s_send and s_recv can't handle 0MQ binary identities, we
 ;;  set a printable text identity to allow routing.
@@ -102,8 +98,7 @@
       (loop
 	 with client-nbr = +nbr-clients+
 	 with available-workers = 0
-	   ;; this is an inefficient queue implementation. linear time insertion.
-	 with worker-queue = (make-list 10 :initial-element nil)
+	 with worker-queue = (zlist-new)
 	 do
 	   (with-zpollset (items
 			   (backend :zmq-pollin)
@@ -117,7 +112,7 @@
 	       ;;  Queue worker identity for load-balancing
 	       (let ((worker-id (zstr-recv backend)))
 		 (assert (< available-workers +nbr-workers+))
-		 (setf (nth available-workers worker-queue) worker-id)
+		 (zlist-append worker-queue worker-id)
 		 (incf available-workers))
 
 	       ;;  Second frame is empty
@@ -145,12 +140,12 @@
 	       (let ((client-id (zstr-recv frontend)))
 		 (assert (zerop (length (zstr-recv frontend))))
 		 (let ((request (zstr-recv frontend)))
-		   (zstr-sendm backend (car worker-queue))
+		   (zstr-sendm backend (zlist-first worker-queue))
 		   (zstr-sendm backend "")
 		   (zstr-sendm backend client-id)
 		   (zstr-sendm backend "")
 		   (zstr-send backend request)))
 	       ;; Dequeue and drop the next worker identity
-	       (dequeue worker-queue)
+	       (zlist-pop worker-queue)
 	       (decf available-workers))))))
   0)

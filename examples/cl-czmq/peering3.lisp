@@ -1,9 +1,8 @@
 ;;  Broker peering simulation (part 3)
 ;;  Prototypes the full flow of status and tasks
 
-(ql:quickload '("cl-czmq" "cl-launch" "lparallel"))
+(ql:quickload '("cl-czmq" "cl-launch"))
 (use-package :cl-czmq)
-(use-package :lparallel.raw-queue)
 
 (defconstant +nbr-clients+ 10)
 (defconstant +nbr-workers+ 3)
@@ -151,7 +150,7 @@
       (loop
 	 with local-capacity = 0
 	 with cloud-capacity = 0
-	 with workers = (make-raw-queue)
+	 with workers = (zlist-new)
 
 	 ;;  .split main loop
 	 ;;  The main loop has two parts. First, we poll workers and our two service
@@ -177,7 +176,7 @@
 		      (unless msg
 			(loop-finish)) ;;  Interrupted
 		      (let ((identity (zmsg-unwrap msg)))
-			(push-raw-queue identity workers)
+			(zlist-append workers identity)
 			(incf local-capacity))
 
 		      ;;  If it's READY, don't route the message any further
@@ -238,7 +237,7 @@
 			     (loop-finish))) ;;  No work, go back to primary
 
 		      (if (plusp local-capacity)
-			  (let ((frame (pop-raw-queue workers)))
+			  (let ((frame (zlist-pop workers)))
 			    (zmsg-wrap msg frame)
 			    (zmsg-send msg localbe)
 			    (decf local-capacity))
@@ -258,7 +257,7 @@
 		 (zstr-send statebe "~d" local-capacity))))
 	 finally
 	 ;;  When we're done, clean up properly
-	   (loop while (plusp (raw-queue-count workers)) do
-		(let ((frame (pop-raw-queue workers)))
+	   (loop while (plusp (zlist-size workers)) do
+		(let ((frame (zlist-pop workers)))
 		  (zframe-destroy frame))))))
   0)

@@ -12,23 +12,6 @@
 (defconstant +nbr-workers+ 3)
 (defparameter *worker-ready* #(1))
 
-;; simple queue
-(defun make-queue ()
-  (cons nil nil))
-
-(defun enqueue (q obj)
-  (if (null (car q))
-      (setf (cdr q) (setf (car q) (list obj)))
-      (setf (cdr (cdr q)) (list obj)
-            (cdr q) (cdr (cdr q))))
-  (car q))
-
-(defun dequeue (q)
-  (pop (car q)))
-
-(defun queue-length (q)
-  (length (car q)))
-
 ;;  Basic request-reply client using REQ socket
 ;;
 (defun client-task (&rest args)
@@ -76,11 +59,11 @@
   (declare (ignore poller))
   (let ((msg (zmsg-recv frontend)))
     (when msg
-      (zmsg-wrap msg (dequeue workers))
+      (zmsg-wrap msg (zlist-pop workers))
       (zmsg-send msg backend)
 
       ;;  Cancel reader on frontend if we went from 1 to 0 workers
-      (when (zerop (queue-length workers))
+      (when (zerop (zlist-size workers))
 	(with-zpollset (poller (frontend :zmq-pollin))
 	  (zloop-poller-end loop poller)))))
   t)
@@ -92,10 +75,10 @@
   (let ((msg (zmsg-recv backend)))
     (when msg
       (let ((identity (zmsg-unwrap msg)))
-        (enqueue workers identity)
+        (zlist-append workers identity)
 
         ;;  Enable reader on frontend if we went from 0 to 1 workers
-        (when (= 1 (queue-length workers))
+        (when (= 1 (zlist-size workers))
 	  (with-zpollset (poller (frontend :zmq-pollin))
             (zloop-poller loop poller #'s-handle-frontend frontend backend workers)))
         ;;  Forward message to client if it's not a READY
@@ -125,7 +108,7 @@
 	   (zthread-new #'worker-task))
 
       ;;  Queue of available workers
-      (let ((workers (make-queue)))
+      (let ((workers (zlist-new)))
 
 	;;  Prepare reactor and fire it up
 	(with-zloop (reactor)
@@ -135,7 +118,7 @@
 	  (zloop-start reactor))
 
 	;;  When we're done, clean up properly
-	(loop for frame = (dequeue workers)
+	(loop for frame = (zlist-pop workers)
 	   while frame do
 	     (zframe-destroy frame)))))
 0)

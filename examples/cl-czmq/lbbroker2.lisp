@@ -8,23 +8,6 @@
 (defconstant +nbr-workers+ 3)
 (defparameter *worker-ready* #(1))
 
-;; simple queue
-(defun make-queue ()
-  (cons nil nil))
-
-(defun enqueue (q obj)
-  (if (null (car q))
-      (setf (cdr q) (setf (car q) (list obj)))
-      (setf (cdr (cdr q)) (list obj)
-            (cdr q) (cdr (cdr q))))
-  (car q))
-
-(defun dequeue (q)
-  (pop (car q)))
-
-(defun queue-length (q)
-  (length (car q)))
-
 ;;  Basic request-reply client using REQ socket
 ;;
 (defun client-task (&rest args)
@@ -83,7 +66,7 @@
 	   (zthread-new #'worker-task))
 
       ;;  Queue of available workers
-      (let ((workers (make-queue)))
+      (let ((workers (zlist-new)))
 
 	;;  .split main load-balancer loop
 	;;  Here is the main loop for the load balancer. It works the same way
@@ -94,7 +77,7 @@
 			     (backend :zmq-pollin)
 			     (frontend :zmq-pollin))
 	     ;;  Poll frontend only if we have available workers
-	       (unless (zpollset-poll items (if (plusp (queue-length workers)) 2 1) -1)
+	       (unless (zpollset-poll items (if (plusp (zlist-size workers)) 2 1) -1)
 		 (loop-finish)) ;;  Interrupted
 
 	     ;;  Handle worker activity on backend
@@ -104,7 +87,7 @@
 		   (unless msg
 		     (loop-finish)) ;;  Interrupted
 		   (let ((identity (zmsg-unwrap msg)))
-		     (enqueue workers identity))
+		     (zlist-append workers identity))
 
 		   ;;  Forward message to client if it's not a READY
 		   (let ((frame (zmsg-first msg)))
@@ -115,12 +98,12 @@
 		 ;;  Get client request, route to first available worker
 		 (let ((msg (zmsg-recv frontend)))
 		   (when msg
-		     (zmsg-wrap msg (dequeue workers))
+		     (zmsg-wrap msg (zlist-pop workers))
 		     (zmsg-send msg backend))))))
 
 
 	;;  When we're done, clean up properly
-	(loop while (plusp (queue-length workers)) do
-	     (let ((frame (dequeue workers)))
+	(loop while (plusp (zlist-size workers)) do
+	     (let ((frame (zlist-pop workers)))
 	       (zframe-destroy frame))))))
   0)

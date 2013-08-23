@@ -11,23 +11,6 @@
 (defconstant +nbr-workers+ 3)
 (defparameter *worker-ready* #(1))
 
-;; simple queue
-(defun make-queue ()
-  (cons nil nil))
-
-(defun enqueue (q obj)
-  (if (null (car q))
-      (setf (cdr q) (setf (car q) (list obj)))
-      (setf (cdr (cdr q)) (list obj)
-            (cdr q) (cdr (cdr q))))
-  (car q))
-
-(defun dequeue (q)
-  (pop (car q)))
-
-(defun queue-length (q)
-  (length (car q)))
-
 ;;  Basic request-reply client using REQ socket
 ;;
 (defun client-task (&rest args)
@@ -83,11 +66,11 @@
   (declare (ignore poller))
   (let ((msg (zmsg-recv (lbbroker-frontend lbbroker))))
     (when msg
-      (zmsg-wrap msg (dequeue (lbbroker-workers lbbroker)))
+      (zmsg-wrap msg (zlist-pop (lbbroker-workers lbbroker)))
       (zmsg-send msg (lbbroker-backend lbbroker))
 
       ;;  Cancel reader on frontend if we went from 1 to 0 workers
-      (when (zerop (queue-length (lbbroker-workers lbbroker)))
+      (when (zerop (zlist-size (lbbroker-workers lbbroker)))
 	(with-zpollset (poller ((lbbroker-frontend lbbroker) :zmq-pollin))
 	  (zloop-poller-end loop poller)))))
   t)
@@ -99,10 +82,10 @@
   (let ((msg (zmsg-recv (lbbroker-backend lbbroker))))
     (when msg
       (let ((identity (zmsg-unwrap msg)))
-        (enqueue (lbbroker-workers lbbroker) identity)
+        (zlist-append (lbbroker-workers lbbroker) identity)
 
         ;;  Enable reader on frontend if we went from 0 to 1 workers
-        (when (= 1 (queue-length (lbbroker-workers lbbroker)))
+        (when (= 1 (zlist-size (lbbroker-workers lbbroker)))
 	  (with-zpollset (poller ((lbbroker-frontend lbbroker) :zmq-pollin))
             (zloop-poller loop poller #'s-handle-frontend lbbroker)))
         ;;  Forward message to client if it's not a READY
@@ -135,7 +118,7 @@
 		       :frontend frontend
 		       :backend  backend
 		       ;;  Queue of available workers
-		       :workers (make-queue))))
+		       :workers (zlist-new))))
 
 	;;  Prepare reactor and fire it up
 	(with-zloop (reactor)
@@ -144,7 +127,7 @@
 	  (zloop-start reactor))
 
 	;;  When we're done, clean up properly
-	(loop for frame = (dequeue (lbbroker-workers lbbroker))
+	(loop for frame = (zlist-pop (lbbroker-workers lbbroker))
 	   while frame do
 	     (zframe-destroy frame)))))
 0)

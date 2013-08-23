@@ -1,9 +1,8 @@
 ;;  Broker peering simulation (part 2)
 ;;  Prototypes the request-reply flow
 
-(ql:quickload '("cl-czmq" "cl-launch" "lparallel"))
+(ql:quickload '("cl-czmq" "cl-launch"))
 (use-package :cl-czmq)
-(use-package :lparallel.raw-queue)
 
 (defconstant +nbr-clients+ 10)
 (defconstant +nbr-workers+ 3)
@@ -114,7 +113,7 @@
 
       ;;  Least recently used queue of available workers
       (loop with capacity = 0
-	 with workers = (make-raw-queue) do
+	 with workers = (zlist-new) do
 	   ;;  First, route any waiting replies from workers
 	   (with-zpollset (backends
 			   (localbe :zmq-pollin)
@@ -131,7 +130,7 @@
 		      (unless msg
 			(loop-finish)) ;;  Interrupted
 		      (let ((identity (zmsg-unwrap msg)))
-			(push-raw-queue identity workers)
+			(zlist-append workers identity)
 			(incf capacity))
 
 		      ;;  If it's READY, don't route the message any further
@@ -197,13 +196,13 @@
 			  (zmsg-send msg cloudbe)
 			  )
 			;; else
-			(let ((frame (pop-raw-queue workers)))
+			(let ((frame (zlist-pop workers)))
 			  (zmsg-wrap msg frame)
 			  (zmsg-send msg localbe)
 			  (decf capacity))))))
 	 finally
 	   ;;  When we're done, clean up properly
-	 (loop while (plusp (raw-queue-count workers)) do
-	      (let ((frame (pop-raw-queue workers)))
+	 (loop while (plusp (zlist-size workers)) do
+	      (let ((frame (zlist-pop workers)))
 		(zframe-destroy frame))))))
   0)
