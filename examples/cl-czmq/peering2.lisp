@@ -1,4 +1,4 @@
-;  Broker peering simulation (part 2)
+;;  Broker peering simulation (part 2)
 ;;  Prototypes the request-reply flow
 
 (ql:quickload '("cl-czmq" "cl-launch" "lparallel"))
@@ -27,7 +27,7 @@
 	 ;;  Send request, get reply
 	   (zstr-send client "HELLO")
 
-	 (let ((reply (zstr-recv-retry client)))
+	 (let ((reply (zstr-recv client)))
 	   (unless reply
 	     (loop-finish)) ;;  Interrupted
 	   (format t "Client: ~A~%" reply))
@@ -50,7 +50,7 @@
 
       ;;  Process messages as they arrive
       (loop do
-	   (let ((msg (zmsg-recv-retry worker)))
+	   (let ((msg (zmsg-recv worker)))
 	     (unless msg
 	       (loop-finish)) ;;  Interrupted
 

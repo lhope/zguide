@@ -41,7 +41,7 @@
       ;;  Send request, get reply
       (loop do
 	   (zstr-send client "HELLO")
-	   (let ((reply (zstr-recv-retry client)))
+	   (let ((reply (zstr-recv client)))
 	     (format t "Client: ~s~%" reply))
 	   (sleep 1)))))
 
@@ -60,7 +60,7 @@
 
 	;;  Process messages as they arrive
 	(loop do
-	   (let ((msg (zmsg-recv-retry worker)))
+	   (let ((msg (zmsg-recv worker)))
 	     ;;  Get request, send reply
 
 	     (zframe-reset (zmsg-last msg) "OK")
