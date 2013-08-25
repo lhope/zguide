@@ -39,7 +39,7 @@
 	(loop do
 	   ;;  Poll for activity, or 1 second timeout
 	     (with-zpollset (items (statefe :zmq-pollin))
-	       (unless (zpollset-poll items 1 (* 1000 +zmq-poll-msec+))
+	       (unless (zpollset-poll items 1 1000)
 		 (loop-finish)) ;;  Interrupted
 
 	       ;;  Handle incoming status messages

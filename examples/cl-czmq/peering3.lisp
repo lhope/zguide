@@ -37,7 +37,7 @@
 
 		  ;;  Wait max ten seconds for a reply, then complain
 		  (with-zpollset (pollset (client :zmq-pollin))
-		    (unless (zpollset-poll pollset 1 (* 10 1000 +zmq-poll-msec+))
+		    (unless (zpollset-poll pollset 1 (* 10 1000))
 		      ;; LH: I suspect the original break; was a bug never caught.
 		      (zstr-send monitor "E: CLIENT EXIT - interrupted - ~A" task-id)
 		      (return-from client-task)) ;;  Interrupted
@@ -164,7 +164,7 @@
 			   (statefe :zmq-pollin)
 			   (monitor :zmq-pollin))
 	     ;;  If we have no workers ready, wait indefinitely
-	     (unless (zpollset-poll primary 4 (if (plusp local-capacity) (* 1000 +ZMQ-POLL-MSEC+) -1))
+	     (unless (zpollset-poll primary 4 (if (plusp local-capacity) 1000 -1))
 	       (loop-finish)) ;;  Interrupted
 
 	     ;;  Track if capacity changes during this iteration

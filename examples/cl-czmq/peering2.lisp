@@ -119,8 +119,7 @@
 			   (localbe :zmq-pollin)
 			   (cloudbe :zmq-pollin))
 	     ;;  If we have no workers, wait indefinitely
-	     (unless (zpollset-poll backends 2
-				    (if (zerop capacity) -1 (* 1000 +zmq-poll-msec+)))
+	     (unless (zpollset-poll backends 2 (if (zerop capacity) -1 1000))
 	       (loop-finish)) ;;  Interrupted
 
 	     (let (msg)

@@ -46,7 +46,7 @@
       (setf *random-state* (make-random-state t))
       (loop with cycles = 0 do
 	   (with-zpollset (items (worker :zmq-pollin))
-	     (unless (zpollset-poll items 1 (* +heartbeat-interval+ +zmq-poll-msec+))
+	     (unless (zpollset-poll items 1 +heartbeat-interval+)
 	       (loop-finish)) ;;  Interrupted
 
 	     (cond ((zpollset-events items 0)

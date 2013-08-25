@@ -28,7 +28,7 @@
 	  (loop with request-nbr = 0 do
 	       ;;  Tick once per second, pulling in arriving messages
 	       (dotimes (centitick 100)
-		 (zpollset-poll items 1 (* 10 cl-czmq::ZMQ_POLL_MSEC))
+		 (zpollset-poll items 1 10)
 		 (when (member :zmq-pollin (zpollset-events items))
 		   (let ((msg (zmsg-recv client)))
 		     (zframe-print (zmsg-last msg) identity)

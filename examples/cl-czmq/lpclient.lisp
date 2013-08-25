@@ -31,7 +31,7 @@
 	      while expect-reply do
 		;;  Poll socket for a reply, with timeout
 		(with-zpollset (items (client :zmq-pollin))
-		  (unless (zpollset-poll items 1 (* +request-timeout+ +zmq-poll-msec+))
+		  (unless (zpollset-poll items 1 +request-timeout+)
 		    (loop-finish)) ;;  Interrupted
 
 		  ;;  .split process server reply

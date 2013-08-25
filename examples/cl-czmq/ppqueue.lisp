@@ -91,7 +91,7 @@
 			   (frontend :zmq-pollin))
 	     ;;  Poll frontend only if we have available workers
 	     (unless (zpollset-poll items (if (plusp (zlist-size workers)) 2 1)
-				    (* +heartbeat-interval+ +zmq-poll-msec+))
+				    +heartbeat-interval+)
 	       (loop-finish)) ;;  Interrupted
 
 	     ;;  Handle worker activity on backend
