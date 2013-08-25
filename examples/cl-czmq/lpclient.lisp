@@ -19,9 +19,9 @@
       (loop
 	 with sequence = 0
 	 with retries-left = +request-retries+
+	 with request
 	 while (and (plusp retries-left)
 		    (not (zctx-interrupted)))
-	 with request
 	 do
 	   ;;  We send a request, then we work to get a reply
 	   (setf request (format nil "~d" (incf sequence)))
@@ -52,7 +52,8 @@
 				       expect-reply nil))
 			       (format t "E: malformed reply from server: ~s~%" reply))))
 			((zerop (decf retries-left))
-			 (format t "E: server seems to be offline, abandoning~%"))
+			 (format t "E: server seems to be offline, abandoning~%")
+			 (loop-finish))
 			(t
 			 (format t "W: no response from server, retrying...~%")
 			 ;;  Old socket is confused; close it and open a new one
