@@ -25,7 +25,7 @@
   (make-worker
    :identity identity
    :id-string (zframe-strhex identity)
-   :expiry (+ (get-internal-real-time)
+   :expiry (+ (zclock-time)
 	      (* +heartbeat-interval+ +heartbeat-liveness+))))
 
 ;;  Destroy specified worker object, including identity frame.
@@ -63,7 +63,7 @@
 (defun s-workers-purge (workers)
   (loop for worker = (zlist-first workers)
      while worker do
-       (when (< (get-internal-real-time) (worker-expiry worker))
+       (when (< (zclock-time) (worker-expiry worker))
 	 (loop-finish)) ;;  Worker is alive, we're done here
        (zlist-remove workers worker)
        (s-worker-destroy worker)))
@@ -84,7 +84,7 @@
 	 ;;  List of available workers
 	 with workers = (zlist-new)
 	 ;;  Send out heartbeats at regular intervals
-	 with heartbeat-at = (+ (get-internal-real-time) +heartbeat-interval+)
+	 with heartbeat-at = (+ (zclock-time) +heartbeat-interval+)
 	 do
 	   (with-zpollset (items
 			   (backend :zmq-pollin)
@@ -126,14 +126,14 @@
 	     ;;  We handle heartbeating after any socket activity. First, we send
 	     ;;  heartbeats to any idle workers if it's time. Then, we purge any
 	     ;;  dead workers:
-	     (when (>= (get-internal-real-time) heartbeat-at)
+	     (when (>= (zclock-time) heartbeat-at)
 	       (loop for worker = (zlist-first workers) then (zlist-next workers)
 		  while worker do
 		  (zframe-send (worker-identity worker) backend
 			       :zframe-reuse :zframe-more)
 		  (let ((frame (zframe-new *ppp-heartbeat*)))
 		    (zframe-send frame backend)))
-	       (setf heartbeat-at (+ (get-internal-real-time) +heartbeat-interval+)))
+	       (setf heartbeat-at (+ (zclock-time) +heartbeat-interval+)))
 	     (s-workers-purge workers))
 	 finally
 	 ;;  When we're done, clean up properly

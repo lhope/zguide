@@ -57,7 +57,7 @@
 	     ;;  Send 0..4 replies back
 	     (loop repeat (random 5) do
 		;;  Sleep for some fraction of a second
-		  (sleep (* .001 (1+ (random 1000))))
+		  (zclock-sleep (1+ (random 1000)))
 		  (zframe-send identity worker :ZFRAME-REUSE :ZFRAME-MORE)
 		  (zframe-send content worker :ZFRAME-REUSE))
 	     (zframe-destroy identity)

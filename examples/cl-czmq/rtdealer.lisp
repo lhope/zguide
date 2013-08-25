@@ -51,7 +51,7 @@
 
       ;;  Run for five seconds and then tell workers to end
       (loop
-	 with end-time = (+ (get-internal-real-time) 5000)
+	 with end-time = (+ (zclock-time) 5000)
 	 with workers-fired = 0
 	 do
 	   ;;  Next message gives us least recently used worker
@@ -63,7 +63,7 @@
 	   (zstr-sendm broker "")
 
 	 ;;  Encourage workers until it's time to fire them
-	 (if (< (get-internal-real-time) end-time)
+	 (if (< (zclock-time) end-time)
 	     (zstr-send broker "Work harder")
 	     (progn
 	       (zstr-send broker "Fired!")

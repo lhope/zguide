@@ -22,6 +22,6 @@
 	 (let ((string (zstr-recv receiver)))
 	   (format t "~A." string) ;; Show progress
 	   (finish-output)
-	   (sleep (* 0.001 (parse-integer string))) ;;  Do the work
+	   (zclock-sleep (parse-integer string)) ;;  Do the work
 	   (zstr-send sender ""))))) ;; Send results to sink
   0)

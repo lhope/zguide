@@ -19,7 +19,7 @@
       (zstr-recv receiver)
 
       ;;  Start our clock now
-      (let ((start-time (get-internal-real-time)))
+      (let ((start-time (zclock-time)))
 
 	;;  Process 100 confirmations
 	(dotimes (task-nbr 100)
@@ -31,7 +31,7 @@
 
 	;;  Calculate and report duration of batch
 	(format t "Total elapsed time: ~d msec~%"
-		(- (get-internal-real-time) start-time)))
+		(- (zclock-time) start-time)))
 
       ;;  Send kill signal to workers
       (zstr-send controller "KILL")))

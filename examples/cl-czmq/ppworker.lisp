@@ -41,7 +41,7 @@
 	  (interval +interval-init+)
 
 	  ;;  Send out heartbeats at regular intervals
-	  (heartbeat-at (+ (get-internal-real-time) +heartbeat-interval+)))
+	  (heartbeat-at (+ (zclock-time) +heartbeat-interval+)))
 
       (setf *random-state* (make-random-state t))
       (loop with cycles = 0 do
@@ -104,15 +104,15 @@
 		    (zerop (decf liveness))
 		    (format t "W: heartbeat failure, can't reach queue~%")
 		    (format t "W: reconnecting in ~d msec...~%" interval)
-		    (sleep (* 0.001 interval))
+		    (zclock_sleep interval)
 
 		    (when (< interval +interval-max+)
 		      (setf interval (* interval 2)))
 		    (zsocket-destroy ctx worker)
 		    (setf worker (s-worker-socket ctx)
 			  liveness +heartbeat-liveness+)))
-	     (when (> (get-internal-real-time) heartbeat-at)
-	       (setf heartbeat-at (+ (get-internal-real-time) +heartbeat-interval+))
+	     (when (> (zclock-time) heartbeat-at)
+	       (setf heartbeat-at (+ (zclock-time) +heartbeat-interval+))
 	       (format t "I: worker heartbeat~%")
 	       (let ((frame (zframe-new *ppp-heartbeat*)))
 		 (zframe-send frame worker)))))))
