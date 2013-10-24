@@ -13,6 +13,7 @@ the-community Chapter 6 - The 0MQ Community
 ROUTER-Broker-and-DEALER-Workers ROUTER Broker and DEALER Workers
 Goals Goals
 Preemptive-Discovery-over-Raw-Sockets Preemptive Discovery over Raw Sockets
+The-Importance-of-Contracts The Importance of Contracts
 Messaging-Patterns Messaging Patterns
 Crazy-Beautiful-and-Easy Crazy, Beautiful, and Easy
 Symbolic-Links Symbolic Links
@@ -122,10 +123,11 @@ Federation-vs-Peering Federation vs. Peering
 Why-use-the-GPLv-for-Public-Specifications Why use the GPLv3 for Public Specifications?
 The-Mindful-General The Mindful General
 The-Pirate-Gang The Pirate Gang
+Eat-Me Eat Me
 A-Self-Healing-P-P-Network-in-Seconds A Self-Healing P2P Network in 30 Seconds
 Shrugging-It-Off Shrugging It Off
-Part-Software-Engineering-using-MQ Part 2 - Software Engineering using 0MQ
 High-availability-Pair-Binary-Star-Pattern High-availability Pair (Binary Star Pattern)
+Part-Software-Engineering-using-MQ Part 2 - Software Engineering using 0MQ
 The-Request-Reply-Mechanisms The Request-Reply Mechanisms
 Spinning-off-a-Library-Project Spinning off a Library Project
 Pros-and-Cons-of-Pub-Sub Pros and Cons of Pub-Sub
@@ -210,7 +212,7 @@ Model-One-Simple-Retry-and-Failover Model One: Simple Retry and Failover
 The-Earth-and-Sky The Earth and Sky
 The-Use-Case The Use Case
 Care-and-Feeding Care and Feeding
-Simplicity-Oriented-Design Simplicity-Oriented Design
+Simplicity-Oriented-Design Simplicity Oriented Design
 Getting-the-Context-Right Getting the Context Right
 Handling-Multiple-Sockets Handling Multiple Sockets
 -MQ-in-a-Hundred-Words 0MQ in a Hundred Words
@@ -252,8 +254,8 @@ Preliminaries Preliminaries
 Centralized-vs-Decentralized Centralized vs. Decentralized
 Change-Latency Change Latency
 The-Hangman The Hangman
-The-Simple-Reply-Envelope The Simple Reply Envelope
 The-Laughing-Clown The Laughing Clown
+The-Simple-Reply-Envelope The Simple Reply Envelope
 The-Provocateur The Provocateur
 Asynchronous-Majordomo-Pattern Asynchronous Majordomo Pattern
 Robust-Reliable-Queuing-Paranoid-Pirate-Pattern Robust Reliable Queuing (Paranoid Pirate Pattern)
