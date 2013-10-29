@@ -191,5 +191,6 @@
 	   (when (> (zclock-time) heartbeat-at)
 	     (s-mdwrk-send-to-broker mdwrk *mdpw-heartbeat* nil nil)
 	     (setf heartbeat-at (+ (zclock-time) heartbeat))))
+       finally
 	 (when (zctx-interrupted)
 	   (format t "W: interrupt received, killing worker...~%")))))
